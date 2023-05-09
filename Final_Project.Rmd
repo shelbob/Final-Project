@@ -1,0 +1,83 @@
+---
+title: "Final Project"
+author: "Shelby Nechkash"
+date: "2023-04-26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+*Overview of Final Project*
+
+Final project will review the airbnb listings for London, Barcelona, and Paris and compare between the three cities. Data was retreived from Kaggle at https://www.kaggle.com/datasets/thedevastator/airbnb-prices-in-european-cities.
+
+Github with datasets is at https://github.com/shelbob/Final-Project. 
+
+The three documents will need to be combined with a new column listing city of listing in order to be properly worked with. Other than this there is no cleaning of data that has to be done. 
+
+```{r}
+library(tidyverse)
+london=read.csv("london_weekends.csv")
+barcelona=read.csv("barcelona_weekends.csv")
+paris=read.csv("paris_weekends.csv")
+head(london)
+head(barcelona)
+head(paris)
+```
+
+#adding a City column
+```{r}
+london=london %>% mutate(City="London")
+barcelona=barcelona %>% mutate(City="Barcelona")
+paris=paris %>% mutate(City="Paris")
+```
+
+#Combining the data sets
+```{r}
+bnb=rbind(london, barcelona, paris)
+```
+
+```{r}
+#scatter
+ggplot(bnb, aes(x=attr_index, y=dist, color=room_type)) + geom_point() + coord_flip() + facet_wrap(.~ City)
+```
+This graph demonstrates the relationship between attraction index (attrations in the area), related to distance from the city center and colored by room type. Through this you can see that the shorter the distance to the city center the higher the attraction index tends to be. With room type you can see that most of the rooms in Barcelona are private rooms, while London has a pretty good mix of private roooms and entire homes. Paris on the other hand is mostly entire homes/apartments. 
+
+```{r}
+#boxplot
+ggplot(bnb, aes(x=person_capacity, color=room_private)) + geom_boxplot() + facet_wrap(.~ City) + theme_grey()
+```
+With the boxplot I was able to look more into the capacity of the listings and I further split them into if the room was private or not. It seems that in all cities rooms that are not private (private are a single room in a house/apartment) have a higher average capacity. Almost all private rooms had a capacity of 2 people. While Barcelona had an average of 4 people for non private rooms with most ranging from 3 to 5. London had a range of 2 to 4 with the median also being 4. And Paris was the lowest witha range of 2 to 4 and a median of 3. 
+
+```{r}
+#barplot
+ggplot(bnb, aes(x=room_type, fill=host_is_superhost)) + geom_bar() + facet_wrap(.~ City) + theme(axis.text.x = element_text(angle=45, vjust=1, hjust=1))
+```
+This graph also looks at room types but I wanted to see the distribution of room types out of the total and how many hosts were super hosts. Between the cities shared room is always the smallest room type, and super hosts are very uncommon. For Barcelona and London private rooms are more common that entire homes, but this is more apparent in Barcelona. However, in Paris entire homes are much more common than private rooms. 
+
+
+```{r}
+#line
+ggplot(bnb, aes(x=guest_satisfaction_overall, y=realSum)) + geom_line() + facet_wrap(.~ City)
+```
+Although it is the simplest graph, the guest satisfaction by the cost of the room does tell some interesting information. You will see that the patterns are generally the same between the three cities. Low satisfaction rooms have a lost cost, but prices start to spike once satisfaction rises. This is most drastic in London and has the least effect in Paris. 
+
+```{r}
+#histogram
+ggplot(bnb, aes(x=cleanliness_rating)) + geom_histogram() + facet_wrap(.~ City)
+```
+For this graph I wanted to see the overall range of cleanliness ratings. And I was pleasantly suprised by the results. There are very few ratings under 5, with most ratings being avoe 7.5 and a majority at 10. It also again demonstrates that London has the most listings in this data set, followed by Paris, and finally Barcelona. 
+
+
+```{r}
+#map
+bnb %>% filter(City=="Paris") %>% ggplot(aes(x=lng, y=lat)) + geom_point()
+
+bnb %>% filter(City=="Barcelona") %>% ggplot(aes(x=lng, y=lat)) + geom_point()
+
+bnb %>% filter(City=="London") %>% ggplot(aes(x=lng, y=lat)) + geom_point()
+```
+
+For my final graph I wanted to take advantage of the coordinates included in the data set. Although I do not have a nice boarder considering these are three very different European cities, you can see the density of listings very easily. For Paris most listings are on the North side and move slightly down to the East. You can also see the blank section due to Seine river. Barcelona has most of its listings on the South side, which correlates to most listings being on or next to the beach. London is the most different out of the three cities. Instead of having one major area with most of the listings, there are many smaller clumps where the listings are dense. Although most listings are still on the Northern side of the city and you can see the gap left from the River Thames. 
